@@ -1,0 +1,21 @@
+{
+  "repo_path": "",
+  "project": {
+    "readme": "CubeSolve is a Python-based Rubik's Cube Solver and 3D Visualizer. Supports 3x3 to NxN cubes with multiple solving algorithms (LBL, CFOP, Kociemba, Cage) and rendering backends (Pyglet, Tkinter, Console, Headless, Web).",
+    "pyproject_summary": "name = cubesolve\nversion = 0.1.0\nrequires-python = >=3.10"
+  },
+  "solvers": [
+    {"name": "LBL", "file": "cube/domain/solver/_3x3/beginner/", "preview": "Beginner Layer-By-Layer solver. Simple visual approach."},
+    {"name": "CFOP", "file": "cube/domain/solver/_3x3/cfop/", "preview": "Fridrich method (Cross, F2L, OLL, PLL). Advanced, faster."},
+    {"name": "Kociemba", "file": "cube/domain/solver/_3x3/kociemba/", "preview": "Near-optimal solver. 18-22 moves for 3x3."},
+    {"name": "Cage", "file": "cube/domain/solver/reducers/", "preview": "Big cube solver using reduction method."}
+  ],
+  "cli": {
+    "running_guide": "python -m cube.main_any_backend [--backend=pyglet2|tkinter|headless|console|web] [--cube-size=N] [--commands=CMD1,CMD2]"
+  },
+  "architecture": "Layered architecture: Domain (model, algs, solver, geometric) -> Application (app, state, operator, animation) -> Presentation (gui backends, 3D viewer).",
+  "test_info": {
+    "testing_guide": "pytest (with pytest-xdist for parallel). Markers: slow, benchmark, gui, console. Test dirs: solvers/, algs/, performance/, gui/, backends/, console/."
+  },
+  "modules": []
+}
