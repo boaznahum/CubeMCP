@@ -45,7 +45,6 @@ redeploying it.
 | `cube_solve` | Solve a scrambled cube, return move sequence | `size: int`, `solver: str`, `seed: int` |
 | `cube_list_solvers` | List available solving algorithms | — |
 | `cubesolve_search` | Search the CubeSolve codebase | `query: str`, `file_pattern: str` |
-| `cubesolve_relearn` | Re-scan CubeSolve repo and regenerate knowledge base | `repo_path: str`, `branch: str` |
 
 ### Resources (read-only data Claude Code can access)
 
@@ -64,28 +63,34 @@ redeploying it.
 | `debug_solver` | Help debug a solver issue in CubeSolve |
 | `explain_algorithm` | Explain a specific solving algorithm |
 
-## Relearn Mechanism
+## Relearn Mechanism (CLI only)
 
 The **relearn** system allows the MCP server to update its understanding of CubeSolve
-without redeploying:
+without redeploying. Relearn is invoked **only via the CLI** — it is intentionally
+not exposed as an MCP tool because it has side effects (git checkout, file scanning,
+writing to disk) that should not be triggered by the client.
 
-1. **Trigger**: Invoke the `cubesolve_relearn` tool (with optional `branch` parameter),
-   or run `cubemcp relearn --branch <name>` from the CLI.
-1b. **Branch checkout**: If a branch is specified, fetches it from origin and checks it out.
-2. **Scan phase**: The server walks the CubeSolve repo, reading key files:
+The client accesses the knowledge through read-only **MCP resources** instead.
+
+**CLI usage**: `cubemcp relearn --repo /path/to/cubesolve [--branch <name>]`
+
+**Phases**:
+
+1. **Branch checkout**: If a branch is specified, fetches it from origin and checks it out.
+2. **Scan phase**: Walks the CubeSolve repo, reading key files:
    - `README.md`, `arch.md`, `RUNNING.md`, `TESTING.md`
    - `pyproject.toml` (dependencies, entry points, test config)
    - Solver source files and their docstrings
    - Test structure and available test markers
 3. **Extract phase**: Structured knowledge is extracted — solver names, CLI flags,
    architecture layers, module purposes, key classes, keyboard shortcuts.
-4. **Store phase**: Knowledge is serialized to a JSON/YAML knowledge base file
-   (`~/.cubemcp/knowledge.json` or inside the CubeMCP data directory).
-5. **Reload phase**: The MCP server reloads the knowledge base in-memory. New
-   resources and tool descriptions reflect the updated knowledge immediately.
+4. **Store phase**: Knowledge is serialized to `~/.cubemcp/knowledge.json`.
+5. **Serve phase**: The MCP server serves the knowledge through read-only resources
+   (`cubesolve://architecture`, `cubesolve://solvers`, `cubesolve://commands`,
+   `cubesolve://knowledge`). New knowledge is picked up immediately.
 
 This means: when CubeSolve changes (new solvers, new CLI flags, refactored modules),
-you just run `cubesolve_relearn` and the MCP server catches up.
+you run `cubemcp relearn` from the CLI, and the MCP server catches up.
 
 ## Installation & Usage
 
@@ -126,18 +131,14 @@ claude mcp list
 /mcp
 ```
 
-### Relearn
+### Relearn (CLI only)
 
 ```bash
-# From CLI — current branch
+# Current branch
 uv run cubemcp relearn --repo /path/to/cubesolve
 
-# From CLI — specific branch
+# Specific branch
 uv run cubemcp relearn --repo /path/to/cubesolve --branch big-lbl-5
-
-# From within Claude Code (via MCP tool)
-# Just ask: "relearn the CubeSolve codebase"
-# Or: "relearn CubeSolve from the big-lbl-5 branch"
 ```
 
 ### Run tests
@@ -165,8 +166,7 @@ uv run pytest tests/test_tools.py  # Tool tests only
 │       │   ├── __init__.py
 │       │   ├── build.py         # cubesolve_build, cubesolve_test, cubesolve_run
 │       │   ├── solve.py         # cube_scramble, cube_solve, cube_list_solvers
-│       │   ├── search.py        # cubesolve_search
-│       │   └── relearn.py       # cubesolve_relearn — knowledge regeneration
+│       │   └── search.py        # cubesolve_search
 │       ├── resources/
 │       │   ├── __init__.py
 │       │   └── knowledge.py     # Resource providers (architecture, solvers, etc.)

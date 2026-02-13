@@ -88,7 +88,7 @@ Once registered, just talk to Claude Code naturally:
 - *"Solve a 3x3 cube with the beginner method"* — calls `cube_solve`
 - *"List the available solvers"* — calls `cube_list_solvers`
 - *"Search for 'scramble' in CubeSolve"* — calls `cubesolve_search`
-- *"Relearn the CubeSolve codebase"* — calls `cubesolve_relearn`
+- *"What solvers are available?"* — reads `cubesolve://solvers` resource
 
 ## Quick Start (end-to-end)
 
@@ -119,27 +119,29 @@ claude mcp list
 # Try: "solve a 3x3 cube", "run cubesolve tests", "search for scramble"
 ```
 
-## Relearn
+## Relearn (CLI only)
 
 When CubeSolve changes (new solvers, refactored modules, updated CLI), update
-CubeMCP's knowledge:
+CubeMCP's knowledge by running the CLI command:
 
 ```bash
-# From CLI — learn from current branch
+# Learn from current branch
 uv run cubemcp relearn --repo /path/to/cubesolve
 
-# From CLI — learn from a specific branch
+# Learn from a specific branch
 uv run cubemcp relearn --repo /path/to/cubesolve --branch main
 uv run cubemcp relearn --repo /path/to/cubesolve --branch big-lbl-5
-
-# From within Claude Code (via MCP tool)
-# Just say: "relearn the CubeSolve codebase"
-# Or: "relearn CubeSolve from the big-lbl-5 branch"
 ```
 
 This re-scans the repo, extracts structured knowledge, and updates the knowledge
 base at `~/.cubemcp/knowledge.json`. The knowledge base records which branch
 was scanned.
+
+> **Design note**: Relearn is intentionally **not** exposed as an MCP tool. It has
+> side effects (git checkout, file scanning, writing to disk) that should not be
+> triggered by the client. Instead, the client accesses the knowledge through
+> read-only **MCP resources** (`cubesolve://architecture`, `cubesolve://solvers`,
+> `cubesolve://commands`, `cubesolve://knowledge`).
 
 ### How relearn works
 
@@ -149,7 +151,7 @@ was scanned.
    solver source files, test structure, CLI docs
 3. **Extract** — parses solver names, CLI flags, module structure, test markers
 4. **Store** — saves to `~/.cubemcp/knowledge.json`; the MCP server picks up the
-   new knowledge immediately
+   new knowledge immediately via the read-only resources
 
 ## Testing
 
@@ -182,8 +184,7 @@ uv run pytest -x
 │   ├── tools/
 │   │   ├── build.py         # cubesolve_build, cubesolve_test, cubesolve_run
 │   │   ├── solve.py         # cube_scramble, cube_solve, cube_list_solvers
-│   │   ├── search.py        # cubesolve_search
-│   │   └── relearn.py       # cubesolve_relearn
+│   │   └── search.py        # cubesolve_search
 │   ├── resources/
 │   │   └── knowledge.py     # MCP resources (architecture, solvers, CLI, knowledge)
 │   ├── prompts/

@@ -20,12 +20,10 @@ mcp = FastMCP(
 from cubemcp.tools.build import register_build_tools
 from cubemcp.tools.solve import register_solve_tools
 from cubemcp.tools.search import register_search_tools
-from cubemcp.tools.relearn import register_relearn_tools
 
 register_build_tools(mcp)
 register_solve_tools(mcp)
 register_search_tools(mcp)
-register_relearn_tools(mcp)
 
 # ---------------------------------------------------------------------------
 # Resources

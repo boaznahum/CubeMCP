@@ -21,7 +21,6 @@ async def test_server_has_tools() -> None:
         "cube_scramble",
         "cube_solve",
         "cubesolve_search",
-        "cubesolve_relearn",
     ]
     for name in expected:
         assert name in tool_names, f"Missing tool: {name}"

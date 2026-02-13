@@ -147,7 +147,6 @@ a knowledge system that stays current with the CubeSolve codebase.
 │  │  - scramble   │ │  - commands │ │  - store       │   │
 │  │  - solve      │ │  - knowledge│ │  - relearn()   │   │
 │  │  - search     │ │             │ │                │   │
-│  │  - relearn    │ │             │ │                │   │
 │  └──────┬────────┘ └──────┬──────┘ └───────┬────────┘   │
 │         │                 │                │              │
 └─────────┼─────────────────┼────────────────┼──────────────┘
@@ -195,8 +194,9 @@ Each tool module groups related functionality:
 - **`search.py`** — Codebase exploration
   - `cubesolve_search`: Grep-like search across CubeSolve source files
 
-- **`relearn.py`** — Knowledge management
-  - `cubesolve_relearn`: Triggers the knowledge engine to re-scan the repo
+> **Note**: Relearn is intentionally not exposed as an MCP tool — it is CLI-only
+> because it has side effects (git checkout, file scanning, disk writes). The client
+> accesses the knowledge through the read-only Resource Layer instead.
 
 #### 3. Resource Layer (`resources/`)
 
